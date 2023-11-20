@@ -10,13 +10,13 @@ class ProductViewSet(viewsets.ModelViewSet):
     serializer_class = ProductSerializer
 
     # get first 3
-    def get_queryset(self):
-        pk = self.kwargs.get('pk')
-
-        if not pk:
-            return Product.objects.all()[:3]
-
-        return Product.objects.filter(pk=pk)
+    # def get_queryset(self):
+    #     pk = self.kwargs.get('pk')
+    #
+    #     if not pk:
+    #         return Product.objects.all()[:3]
+    #
+    #     return Product.objects.filter(pk=pk)
 
     @action(methods=['get'], detail=False)
     def list_id(self, request, pk=None):
