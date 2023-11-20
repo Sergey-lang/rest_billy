@@ -11,4 +11,6 @@ print(router.urls)
 urlpatterns = [
     path('admin/', admin.site.urls),
     path('api/v1/', include(router.urls)),
+    # path('admin/product', ProductAPIList.as_view()),
+    # path('admin/product/<int:pk>', ProductAPIList.as_view()),
 ]
