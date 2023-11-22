@@ -33,6 +33,7 @@ class PointTransactionSerializer(serializers.ModelSerializer):
         return int(summ)
 
     def create(self, validated_data):
+        sender_id = self.initial_data['sender']
         recipient_id = self.initial_data['recipient']
         points_count = self.initial_data['points_count']
 
@@ -40,7 +41,13 @@ class PointTransactionSerializer(serializers.ModelSerializer):
         recipient = Profile.objects.get(pk=recipient_id)
 
         if not recipient:
-            raise serializers.ValidationError('Нет такого юзера')
+            raise serializers.ValidationError({'error': 'Нет такого юзера'})
+
+        summ = PointTransaction.objects.filter(sender_id=sender_id, recipient_id=recipient_id).aggregate(
+            total_points=Sum('points_count'))['total_points']
+
+        if int(points_count) + summ >= 100:
+            raise serializers.ValidationError({'error': 'Слишком много отправил'})
 
         # Send point to recipient profile
         recipient.received_points = recipient.received_points + points_count
