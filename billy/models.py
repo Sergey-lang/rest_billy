@@ -49,4 +49,4 @@ class PointTransaction(models.Model):
     updated_at = models.DateTimeField(auto_now_add=True)
 
     def __str__(self):
-        return f'#{self.pk}'
+        return f'{self.pk}'

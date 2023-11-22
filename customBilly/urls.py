@@ -5,8 +5,9 @@ from billy.views import *
 from rest_framework import routers
 
 router = routers.DefaultRouter()
-router.register(r'product', ProductViewSet, basename='product')
-print(router.urls)
+router.register(r'product', ProductViewSet)
+# router.register(r'transaction', PointTransactionViewSet)
+router.register(r'profile', ProfileListTransactionViewSet)
 
 urlpatterns = [
     path('admin/', admin.site.urls),
