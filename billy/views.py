@@ -37,10 +37,14 @@ def point_transaction_list(request):
             recipient_id = serializer.validated_data.get('recipient').id
             new_points = serializer.validated_data.get('points_count')
 
-            recipient = Profile.objects.get(pk=recipient_id)
-            recipient.received_points = recipient.received_points + new_points
+            # update recipient profile
+            recipient_profile = Profile.objects.get(pk=recipient_id)
+            recipient_profile.received_points = recipient_profile.received_points + new_points
+            recipient_profile.save()
 
-            recipient.save()
+            # update sender profile
+            sender_id = request.user.id
+            sender_profile = Profile.objects.get(pk=sender_id)
             serializer.save()
             return Response(serializer.data, status=status.HTTP_201_CREATED)
         return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)

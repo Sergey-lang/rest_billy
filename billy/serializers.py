@@ -15,7 +15,7 @@ class ProductSerializer(serializers.ModelSerializer):
 class ProfileSerializer(serializers.ModelSerializer):
     class Meta:
         model = Profile
-        fields = ('id', 'first_name', 'last_name', 'received_points')
+        fields = ('id', 'first_name', 'last_name', 'received_points', 'points')
 
 
 class PointTransactionSerializer(serializers.ModelSerializer):
@@ -36,6 +36,12 @@ class PointTransactionSerializer(serializers.ModelSerializer):
         # Get recipient profile
         recipient = Profile.objects.get(pk=recipient_id)
 
+        if sender_id == recipient_id:
+            raise serializers.ValidationError({'error': 'Ты не можешь отправлять баллы себе'})
+
+        if points_count > 100:
+            raise serializers.ValidationError({'error': 'Ты не можешь никому отправить больше 100 баллов'})
+
         if not recipient:
             raise serializers.ValidationError({'error': 'Пользователь не найден'})
         # получить сумму переданных баллов между авторизованным юзером и получателем
@@ -43,7 +49,7 @@ class PointTransactionSerializer(serializers.ModelSerializer):
             total_points=Sum('points_count'))['total_points']
         # проверить лимит баллов к 1 пользователю перед созданием транзакции
         if points_count + summ >= 1200:
-            raise serializers.ValidationError({'error': 'Слишком много отправил'})
+            raise serializers.ValidationError({'error': 'Ты не можешь отправить 1 пользователю больше 100 баллов'})
 
         validated_data['sender_id'] = sender_id
         point_transaction = super().create(validated_data)
