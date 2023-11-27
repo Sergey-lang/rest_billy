@@ -48,7 +48,7 @@ class PointTransactionSerializer(serializers.ModelSerializer):
         summ = PointTransaction.objects.filter(sender_id=sender_id, recipient_id=recipient_id).aggregate(
             total_points=Sum('points_count'))['total_points']
         # проверить лимит баллов к 1 пользователю перед созданием транзакции
-        if points_count + summ >= 1200:
+        if points_count + summ > 100:
             raise serializers.ValidationError({'error': 'Ты не можешь отправить 1 пользователю больше 100 баллов'})
 
         validated_data['sender_id'] = sender_id
