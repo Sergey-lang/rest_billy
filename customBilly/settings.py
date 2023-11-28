@@ -25,7 +25,8 @@ INSTALLED_APPS = [
     'django.contrib.staticfiles',
     'rest_framework',
     'djoser',
-    'billy',
+    # 'billy',
+    'billy.apps.BillyConfig',
 ]
 
 MIDDLEWARE = [
