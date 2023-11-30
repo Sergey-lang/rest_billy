@@ -23,7 +23,7 @@ class PointTransactionSerializer(serializers.ModelSerializer):
 
     class Meta:
         model = PointTransaction
-        fields = ['id', 'sender', 'recipient', 'points_count']
+        fields = ['id', 'sender', 'recipient', 'points_count', 'created_at']
 
     def get_sender(self, obj):
         return self.context['request'].user.id
