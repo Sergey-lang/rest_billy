@@ -28,6 +28,16 @@ class PointTransactionSerializer(serializers.ModelSerializer):
     def get_sender(self, obj):
         return self.context['request'].user.id
 
+    def validate_points_count(self, value):
+        if value > 100:
+            raise serializers.ValidationError({'error': 'Ты не можешь никому отправить больше 100 баллов'})
+
+    def validate(self, data):
+        if data['sender_id'] == data['recipient_id']:
+            raise serializers.ValidationError(
+                {'error': 'Ты не можешь отправлять баллы себе'})
+        return data
+
     def create(self, validated_data):
         # auth user = 2
         sender_id = self.context['request'].user.id
@@ -37,12 +47,6 @@ class PointTransactionSerializer(serializers.ModelSerializer):
 
         # Get recipient profile
         recipient = Profile.objects.get(pk=recipient_id)
-
-        if sender_id == recipient_id:
-            raise serializers.ValidationError({'error': 'Ты не можешь отправлять баллы себе'})
-
-        if points_count > 100:
-            raise serializers.ValidationError({'error': 'Ты не можешь никому отправить больше 100 баллов'})
 
         if not recipient:
             raise serializers.ValidationError({'error': 'Пользователь не найден'})
