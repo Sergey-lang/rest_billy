@@ -1,13 +1,13 @@
 from django.db.models import Sum
 from rest_framework import generics
-from rest_framework import permissions
 from rest_framework import status
 from rest_framework.pagination import PageNumberPagination
 from rest_framework.response import Response
 from rest_framework.views import APIView
 
-from .models import Product, PointTransaction, Profile
-from .serializers import ProductSerializer, ProfileSerializer, PointTransactionSerializer
+from .models import Product, PointTransaction, Profile, Order
+from .serializers import ProductSerializer, ProfileSerializer, PointTransactionSerializer, OrderSerializer, \
+    UpdateOrderStatusSerializer
 
 
 class ProductAPIPagination(PageNumberPagination):
@@ -22,11 +22,22 @@ class ProfileAPIPagination(PageNumberPagination):
     max_page_size = 50
 
 
+class OrderAPIPagination(PageNumberPagination):
+    page_size = 10
+    page_size_query_param = 'page_size'
+    max_page_size = 50
+
+
 class ProductViewSet(generics.ListCreateAPIView):
-    permission_classes = (permissions.IsAuthenticatedOrReadOnly,)
     queryset = Product.objects.all()
     serializer_class = ProductSerializer
     pagination_class = ProductAPIPagination
+
+
+class APIOrders(generics.ListCreateAPIView):
+    queryset = Order.objects.all()
+    serializer_class = OrderSerializer
+    pagination_class = OrderAPIPagination
 
 
 def take_point_from_sender(request, sent_points):
@@ -48,6 +59,12 @@ def add_point_to_recipient(recipient_id, new_points):
     recipient_profile = Profile.objects.get(pk=recipient_id)
     recipient_profile.received_points = recipient_profile.received_points + new_points
     recipient_profile.save()
+
+
+class APIUpdateOrderStatus(generics.UpdateAPIView):
+    queryset = Order.objects.all()
+    serializer_class = UpdateOrderStatusSerializer
+    # todo: only admin
 
 
 class APITransaction(APIView):
