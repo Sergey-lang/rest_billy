@@ -82,4 +82,4 @@ class PointTransaction(models.Model):
     updated_at = models.DateTimeField(auto_now_add=True)
 
     def __str__(self):
-        return f'{self.pk}# {self.sender}--->{self.recipient}'
+        return f'{self.pk}# {self.sender}--->{self.recipient} from {self.created_at}'

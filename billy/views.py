@@ -6,26 +6,9 @@ from rest_framework.response import Response
 from rest_framework.views import APIView
 
 from .models import Product, PointTransaction, Profile, Order
+from .pagination import ProductAPIPagination, OrderAPIPagination, ProfileAPIPagination
 from .serializers import ProductSerializer, ProfileSerializer, PointTransactionSerializer, OrderSerializer, \
     UpdateOrderStatusSerializer
-
-
-class ProductAPIPagination(PageNumberPagination):
-    page_size = 10
-    page_size_query_param = 'page_size'
-    max_page_size = 50
-
-
-class ProfileAPIPagination(PageNumberPagination):
-    page_size = 10
-    page_size_query_param = 'page_size'
-    max_page_size = 50
-
-
-class OrderAPIPagination(PageNumberPagination):
-    page_size = 10
-    page_size_query_param = 'page_size'
-    max_page_size = 50
 
 
 class ProductViewSet(generics.ListCreateAPIView):
@@ -38,6 +21,31 @@ class APIOrders(generics.ListCreateAPIView):
     queryset = Order.objects.all()
     serializer_class = OrderSerializer
     pagination_class = OrderAPIPagination
+
+    def get_queryset(self):
+        user = self.request.user
+        if user.is_superuser:
+            # Для администратора, возвращаем все заказы
+            return Order.objects.all()
+        else:
+            # Для обычного пользователя, возвращаем только его собственные заказы
+            return Order.objects.filter(creator=user.profile)
+
+
+class APIOrderDetail(generics.RetrieveAPIView):
+    queryset = Order.objects.all()
+    serializer_class = OrderSerializer
+
+    def get_object(self):
+        queryset = self.get_queryset()
+        filter_kwargs = {self.lookup_field: self.kwargs[self.lookup_field]}
+        obj = generics.get_object_or_404(queryset, **filter_kwargs)
+
+        user = self.request.user
+        if not user.is_superuser and obj.creator != user.profile:
+            self.permission_denied(self.request)
+
+        return obj
 
 
 def take_point_from_sender(request, sent_points):

@@ -1,6 +1,7 @@
 from django.db.models import Sum
 from rest_framework import serializers
-
+from django.db.models import Q
+from django.utils.timezone import now
 from .models import Product, PointTransaction, Profile, Order
 
 
@@ -51,9 +52,11 @@ class PointTransactionSerializer(serializers.ModelSerializer):
     def validate_points_count(self, value):
         if value > 100:
             raise serializers.ValidationError({'error': 'Ты не можешь никому отправить больше 100 баллов'})
+        return value
 
     def validate(self, data):
-        if data['sender_id'] == data['recipient_id']:
+        x = data['recipient'].id
+        if self.context['request'].user.id == data['recipient'].id:
             raise serializers.ValidationError(
                 {'error': 'Ты не можешь отправлять баллы себе'})
         return data
@@ -70,8 +73,10 @@ class PointTransactionSerializer(serializers.ModelSerializer):
 
         if not recipient:
             raise serializers.ValidationError({'error': 'Пользователь не найден'})
-        # получить сумму переданных баллов между авторизованным юзером и получателем
-        result = PointTransaction.objects.filter(sender_id=sender_id, recipient_id=recipient_id).aggregate(
+        # получить сумму переданных баллов между авторизованным юзером и получателем за текущий месяц
+        current_month = now().month
+        result = PointTransaction.objects.filter(
+            Q(sender_id=sender_id, recipient_id=recipient_id) & Q(created_at__month=current_month)).aggregate(
             total_points=Sum('points_count'))
         # проверить None если не найдено ничего
         summ = result['total_points'] if result['total_points'] is not None else 0
