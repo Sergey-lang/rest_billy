@@ -3,6 +3,8 @@ from django.urls import path, include
 from rest_framework import routers
 
 from billy.views import *
+from product.views import ProductViewSet
+from transaction.views import APITransaction
 
 router = routers.DefaultRouter()
 
