@@ -28,7 +28,6 @@ INSTALLED_APPS = [
     'djoser',
     'billy.apps.BillyConfig',
     'product',
-    'task',
     'transaction',
     'order',
     'django_filters',
