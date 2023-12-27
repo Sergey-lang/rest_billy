@@ -1,14 +1,19 @@
-FROM  python:3.11.5
+# Создать образ на основе базового слоя python (там будет ОС и интерпретатор Python).
+# 3.7 — используемая версия Python.
+# slim — обозначение того, что образ имеет только необходимые компоненты для запуска,
+# он не будет занимать много места при развёртывании.
+FROM python:3.11.5-slim
+# Скопировать с локального компьютера файл зависимостей
+# в директорию /app.
+COPY requirements.tsxt /app
+# Скопировать содержимое директории /customBilly c локального компьютера
+# в директорию /app.
+COPY customBilly /app
+EXPOSE 8000
+# Выполнить установку зависимостей внутри контейнера.
+RUN pip3 install -r /app/requirements.tsxt --no-cache-dir
+# Сделать директорию /app рабочей директорией. 
+WORKDIR /app
 
-RUN mkdir -p /usr/src/app/
-WORKDIR /usr/src/app/
-
-COPY . /usr/src/app/
-RUN pip install --no-cache-dir -r requrements.tsx
-
-ENV TZ Europe/Moskow
-ENV TOKEN_USER=os.getenv('TOKEN_USER')
-ENV VERSION=os.getenv('VERSION')
-ENV DOMAIN=os.getenv('DOMAIN')
-
-CMD ["python", "manage.py"]
+# Выполнить запуск сервера разработки при старте контейнера.
+CMD ["python3", "manage.py", "runserver", "0:8000"] 
