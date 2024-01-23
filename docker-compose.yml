@@ -1,8 +1,23 @@
 version: '3.8'
 services:
-   web:
-       build:
-         context: .
-       ports:
+   redis:
+     image: redis
+     restart: always
+   webapp:
+     volumes:
+       - ".:/app"
+     restart: always
+     build:
+       context: .
+     ports:
          - "8000:8000"
-       command: python manage.py runserver 0.0.0.0:8000
+     command: ["python3", "manage.py", "runserver", "0.0.0.0:8000"]
+
+
+   worker:
+     restart: always
+     build:
+       context: .
+     volumes:
+         - ".:/app/task1"
+     command: ["celery", "--workdir=./", "-A", "customBilly", "worker"]

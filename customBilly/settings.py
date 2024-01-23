@@ -29,8 +29,8 @@ INSTALLED_APPS = [
     'billy.apps.BillyConfig',
     'product',
     'transaction',
-    'order',
     'django_filters',
+    'order',
 ]
 
 MIDDLEWARE = [
@@ -140,3 +140,4 @@ SIMPLE_JWT = {
     'ACCESS_TOKEN_LIFETIME': timedelta(days=100),
     'AUTH_HEADER_TYPES': ('Bearer',),
 }
+CELERY_BROKER_URL = 'redis://redis:6379'
