@@ -1,6 +1,8 @@
 from pathlib import Path
 from datetime import timedelta
 
+from celery.schedules import crontab
+
 # Build paths inside the project like this: BASE_DIR / 'subdir'.
 BASE_DIR = Path(__file__).resolve().parent.parent
 
@@ -131,7 +133,6 @@ REST_FRAMEWORK = {
     ],
 
     'DEFAULT_AUTHENTICATION_CLASSES': (
-        # 'rest_framework.authentication.TokenAuthentication',
         'rest_framework_simplejwt.authentication.JWTAuthentication',
     ),
 }
@@ -140,4 +141,12 @@ SIMPLE_JWT = {
     'ACCESS_TOKEN_LIFETIME': timedelta(days=100),
     'AUTH_HEADER_TYPES': ('Bearer',),
 }
+CELERY_TIMEZONE = 'Europe/Minsk'
+CELERY_TASK_TRACK_STARTED = True
 CELERY_BROKER_URL = 'redis://redis:6379'
+CELERY_BEAT_SCHEDULE = {
+    "add_monthly_members_points": {
+        "task": "transaction.tasks.add_monthly_members_points",
+        "schedule": crontab(hour=0, minute=0, day_of_month=1),
+    }
+}

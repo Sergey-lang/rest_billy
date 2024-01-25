@@ -12,12 +12,17 @@ services:
      ports:
          - "8000:8000"
      command: ["python3", "manage.py", "runserver", "0.0.0.0:8000"]
-
-
-   worker:
+   celeryworker:
      restart: always
      build:
        context: .
      volumes:
          - ".:/app/task1"
-     command: ["celery", "--workdir=./", "-A", "customBilly", "worker"]
+     command: ["celery", "--workdir=/app", "-A", "customBilly", "worker", "--loglevel=DEBUG"]
+   celery-beat:
+     build: .
+     command: celery -A customBilly beat -l info
+     volumes:
+       - .:/code
+     depends_on:
+       - redis
