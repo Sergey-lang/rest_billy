@@ -66,16 +66,3 @@ class APITransaction(APIView):
                 'next': paginator.get_next_link(),
                 'previous': paginator.get_previous_link()
             }, status=status.HTTP_200_OK)
-
-
-class APIPayPointsTransaction(APIView):
-    def put(self, request):
-        try:
-            profiles = Profile.objects.all()
-            for profile in profiles:
-                profile.points = 500
-                profile.save()
-
-            return Response({"message": "Points updated for all profiles."}, status=status.HTTP_201_CREATED)
-        except ValueError as e:
-            return Response({"error": str(e)}, status=400)
