@@ -1,8 +1,11 @@
+from django.db.models import Sum
 from rest_framework import status
 from rest_framework.pagination import PageNumberPagination
 from rest_framework.response import Response
 from rest_framework.views import APIView
 from billy.models import Profile
+from django.utils.timezone import now
+from django.db.models import Q
 
 from .models import PointTransaction
 from .serializers import PointTransactionSerializer
@@ -39,8 +42,20 @@ class APITransaction(APIView):
                 sender_id = request.user.id
                 sender_profile = Profile.objects.get(pk=sender_id)
 
+                current_month = now().month
+                result = PointTransaction.objects.filter(
+                    Q(sender_id=sender_id, recipient_id=recipient_id) & Q(created_at__month=current_month)).aggregate(
+                    total_points=Sum('points_count'))
+                # check None if nothing is found
+                summ = result['total_points'] if result['total_points'] is not None else 0
+
+                # check the points limit to 1 user before creating a transaction
+                if new_points + summ > 100:
+                    raise ValueError(
+                        {'error': 'You can\'t send more than 100 points per month to anyone.'})
+
                 if sender_profile.points == 0 and sender_profile.received_points == 0:
-                    raise ValueError('У тебя нет баллов для отправки view')
+                    raise ValueError('You don\'t have any points to send')
 
                 take_point_from_sender(request, new_points)
 
