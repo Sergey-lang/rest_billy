@@ -1,12 +1,12 @@
 from rest_framework import generics
-from rest_framework import permissions
+from rest_framework import status
+from rest_framework.response import Response
+
+from billy.models import Profile
 from order.models import Order
-from product.models import Product
 from order.pagination import OrderAPIPagination
 from order.serializers import OrderSerializer, UpdateOrderStatusSerializer
-from rest_framework.response import Response
-from rest_framework import status
-from billy.models import Profile
+from product.models import Product
 
 
 def take_point_from_sender(request, sent_points):
@@ -22,6 +22,12 @@ def take_point_from_sender(request, sent_points):
     else:
         sender_profile.points = sender_profile.points - sent_points
         sender_profile.save()
+
+
+def add_point_to_recipient(recipient_id, new_points):
+    recipient_profile = Profile.objects.get(pk=recipient_id)
+    recipient_profile.received_points = recipient_profile.received_points + new_points
+    recipient_profile.save()
 
 
 class APIOrders(generics.ListCreateAPIView):
@@ -79,7 +85,8 @@ class APIOrderDetail(generics.RetrieveAPIView):
 class APIUpdateOrderStatus(generics.UpdateAPIView):
     queryset = Order.objects.all()
     serializer_class = UpdateOrderStatusSerializer
-    permission_classes = [permissions.IsAdminUser]
+
+    # permission_classes = [permissions.IsAdminUser]
 
     def get_queryset(self):
         user = self.request.user
@@ -89,9 +96,8 @@ class APIUpdateOrderStatus(generics.UpdateAPIView):
             return Order.objects.none()
 
     def put(self, request, *args, **kwargs):
-        user = self.request.user
-        order_id = request.data.get()
-        # todo: !!!
+        order_id = self.kwargs['pk']
+
         new_order_status = request.data.get('status')
 
         try:
@@ -99,9 +105,19 @@ class APIUpdateOrderStatus(generics.UpdateAPIView):
         except Order.DoesNotExist:
             return Response({'error': 'Order not found'}, status=status.HTTP_404_NOT_FOUND)
 
+        if new_order_status == order.status:
+            return Response({'message': 'The order status has been successfully changed'}, status=status.HTTP_200_OK)
+
         order.status = new_order_status
         order.save()
 
+        if order.status == 'Declined':
+            # who create order?
+            recipient_id = order.creator.id
+            # how match points
+            order_amount = order.product.amount
+            # return points to creator. How return point to user if
+            # I don't know what type of point to return: monthly or received...Fuck!((
+            add_point_to_recipient(recipient_id, order_amount)
+
         return Response({'message': 'The order status has been successfully changed'}, status=status.HTTP_200_OK)
-
-
