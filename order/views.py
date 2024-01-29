@@ -9,22 +9,16 @@ from order.serializers import OrderSerializer, UpdateOrderStatusSerializer
 from product.models import Product
 
 
-def take_point_from_sender(request, sent_points):
+def take_received_points_from_order_creator(request, sent_points):
     sender_id = request.user.id
     sender_profile = Profile.objects.get(pk=sender_id)
-    points = sender_profile.points
+    received = sender_profile.received_points
 
-    if sent_points > points:
-        remaining_points = sent_points - points
-        sender_profile.points = sender_profile.points - (sent_points - remaining_points)
-        sender_profile.received_points = sender_profile.received_points - remaining_points
-        sender_profile.save()
-    else:
-        sender_profile.points = sender_profile.points - sent_points
-        sender_profile.save()
+    sender_profile.received_points = received - sent_points
+    sender_profile.save()
 
 
-def add_point_to_recipient(recipient_id, new_points):
+def add_received_points_to_order_creator(recipient_id, new_points):
     recipient_profile = Profile.objects.get(pk=recipient_id)
     recipient_profile.received_points = recipient_profile.received_points + new_points
     recipient_profile.save()
@@ -48,7 +42,7 @@ class APIOrders(generics.ListCreateAPIView):
     def post(self, request, *args, **kwargs):
         user = self.request.user
 
-        total_user_points = user.profile.points + user.profile.received_points
+        total_user_points = user.profile.received_points
         product_id = int(request.data.get('product'))
 
         try:
@@ -59,9 +53,9 @@ class APIOrders(generics.ListCreateAPIView):
         product_amount = product.amount
         # Does the user have enough points to purchase?
         if total_user_points < product_amount:
-            return Response({'error': 'You don\'t have enough points'}, status=400)
+            return Response({'error': 'You don\'t have enough points'}, status=status.HTTP_400_BAD_REQUEST)
 
-        take_point_from_sender(request, product_amount)
+        take_received_points_from_order_creator(request, product_amount)
 
         return self.create(request, *args, **kwargs)
 
@@ -116,8 +110,7 @@ class APIUpdateOrderStatus(generics.UpdateAPIView):
             recipient_id = order.creator.id
             # how match points
             order_amount = order.product.amount
-            # return points to creator. How return point to user if
-            # I don't know what type of point to return: monthly or received...Fuck!((
-            add_point_to_recipient(recipient_id, order_amount)
+            # return points to creator.
+            add_received_points_to_order_creator(recipient_id, order_amount)
 
         return Response({'message': 'The order status has been successfully changed'}, status=status.HTTP_200_OK)

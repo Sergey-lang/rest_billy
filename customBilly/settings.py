@@ -147,6 +147,8 @@ CELERY_BROKER_URL = 'redis://redis:6379'
 CELERY_BEAT_SCHEDULE = {
     "add_monthly_members_points": {
         "task": "transaction.tasks.add_monthly_members_points",
-        "schedule": crontab(hour=0, minute=0, day_of_month=1),
+        "schedule": crontab(hour=10, minute=0),
     }
 }
+
+# crontab(hour=0, minute=0, day_of_month=1)

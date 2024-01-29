@@ -26,7 +26,7 @@ def take_point_from_sender(request, sent_points):
         sender_profile.save()
 
 
-def add_point_to_recipient(recipient_id, new_points):
+def add_received_points_to_recipient(recipient_id, new_points):
     recipient_profile = Profile.objects.get(pk=recipient_id)
     recipient_profile.received_points = recipient_profile.received_points + new_points
     recipient_profile.save()
@@ -59,7 +59,7 @@ class APITransaction(APIView):
 
                 take_point_from_sender(request, new_points)
 
-                add_point_to_recipient(recipient_id, new_points)
+                add_received_points_to_recipient(recipient_id, new_points)
 
                 serializer.save()
                 return Response(serializer.data, status=status.HTTP_201_CREATED)
