@@ -1,14 +1,11 @@
-FROM  python:3.11.5
+FROM python:3.11.5-slim
+RUN apt-get update -y
+RUN apt-get upgrade -y
 
-RUN mkdir -p /usr/src/app/
-WORKDIR /usr/src/app/
+WORKDIR /app
 
-COPY . /usr/src/app/
-RUN pip install --no-cache-dir -r requrements.tsx
+COPY ./requirements.txt ./
+RUN pip install -r /app/requirements.txt --no-cache-dir
+COPY . .
 
-ENV TZ Europe/Moskow
-ENV TOKEN_USER=os.getenv('TOKEN_USER')
-ENV VERSION=os.getenv('VERSION')
-ENV DOMAIN=os.getenv('DOMAIN')
-
-CMD ["python", "manage.py"]
+CMD ["python3", "manage.py", "runserver", "0.0.0.0:8000"]

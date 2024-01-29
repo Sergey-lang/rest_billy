@@ -1,0 +1,28 @@
+version: '3.8'
+services:
+   redis:
+     image: redis
+     restart: always
+   webapp:
+     volumes:
+       - ".:/app"
+     restart: always
+     build:
+       context: .
+     ports:
+         - "8000:8000"
+     command: ["python3", "manage.py", "runserver", "0.0.0.0:8000"]
+   celeryworker:
+     restart: always
+     build:
+       context: .
+     volumes:
+         - ".:/app/task1"
+     command: ["celery", "--workdir=/app", "-A", "customBilly", "worker", "--loglevel=DEBUG"]
+   celery-beat:
+     build: .
+     command: celery -A customBilly beat -l info
+     volumes:
+       - .:/code
+     depends_on:
+       - redis
