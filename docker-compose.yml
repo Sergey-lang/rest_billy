@@ -17,12 +17,12 @@ services:
      build:
        context: .
      volumes:
-         - ".:/app/task1"
+         - ".:/app"
      command: ["celery", "--workdir=/app", "-A", "customBilly", "worker", "--loglevel=DEBUG"]
    celery-beat:
      build: .
      command: celery -A customBilly beat -l info
      volumes:
-       - .:/code
+       - ".:/app"
      depends_on:
        - redis
