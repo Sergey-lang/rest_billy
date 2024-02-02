@@ -1,6 +1,12 @@
- .idea
+ /.idea
 
  *.bak
 
 #Database
 *.sqlite3
+/.idea/customBilly.iml
+/.idea/misc.xml
+/.idea/inspectionProfiles/profiles_settings.xml
+/.idea/inspectionProfiles/Project_Default.xml
+/.idea/vcs.xml
+/.idea/workspace.xml
