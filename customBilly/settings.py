@@ -10,12 +10,12 @@ BASE_DIR = Path(__file__).resolve().parent.parent
 # See https://docs.djangoproject.com/en/4.2/howto/deployment/checklist/
 
 # SECURITY WARNING: keep the secret key used in production secret!
-# SECRET_KEY = 'django-insecure-h0yu%x8btn3zzf7yix25_624no*ma*ju4rex8e3tua54dvl67n'
-SECRET_KEY = os.environ.get('DJANGO_SECRET_KEY', 'django-insecure-h0yu%x8btn3zzf7yix25_624no*ma*ju4rex8e3tua54dvl67n')
+SECRET_KEY = 'django-insecure-h0yu%x8btn3zzf7yix25_624no*ma*ju4rex8e3tua54dvl67n'
+# SECRET_KEY = os.environ.get('DJANGO_SECRET_KEY', 'django-insecure-h0yu%x8btn3zzf7yix25_624no*ma*ju4rex8e3tua54dvl67n')
 
 # SECURITY WARNING: don't run with debug turned on in production!
-# DEBUG = True
-DEBUG = bool(os.environ.get('DJANGO_DEBUG', True))
+DEBUG = True
+# DEBUG = bool(os.environ.get('DJANGO_DEBUG', True))
 
 ALLOWED_HOSTS = ['*']
 
@@ -28,6 +28,7 @@ INSTALLED_APPS = [
     'django.contrib.sessions',
     'django.contrib.messages',
     'django.contrib.staticfiles',
+    'django.contrib.postgres',
     'rest_framework',
     'djoser',
     'billy.apps.BillyConfig',
@@ -71,10 +72,21 @@ WSGI_APPLICATION = 'customBilly.wsgi.application'
 # Database
 # https://docs.djangoproject.com/en/4.2/ref/settings/#databases
 
+# DATABASES = {
+#     'default': {
+#         'ENGINE': 'django.db.backends.sqlite3',
+#         'NAME': BASE_DIR / 'db.sqlite3',
+#     }
+# }
+
 DATABASES = {
     'default': {
-        'ENGINE': 'django.db.backends.sqlite3',
-        'NAME': BASE_DIR / 'db.sqlite3',
+        'ENGINE': 'django.db.backends.postgresql',
+        'NAME': 'postgres',
+        'USER': 'postgres',
+        'PASSWORD': 'postgres',
+        'HOST': 'postgres',
+        'PORT': '5432',
     }
 }
 
@@ -149,8 +161,9 @@ CELERY_BROKER_URL = 'redis://redis:6379'
 CELERY_BEAT_SCHEDULE = {
     "add_monthly_members_points": {
         "task": "transaction.tasks.add_monthly_members_points",
-        "schedule": crontab(minute='*'),
+        "schedule": crontab(minute='0', hour='*'),
     }
 }
 
 # crontab(hour=0, minute=0, day_of_month=1)
+# crontab(minute='*'),

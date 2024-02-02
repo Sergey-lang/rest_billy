@@ -3,15 +3,28 @@ services:
    redis:
      image: redis
      restart: always
+   postgres:
+     image: postgres:16.1
+     restart: always
+     environment:
+       - POSTGRES_NAME=postgres
+       - POSTGRES_USER=postgres
+       - POSTGRES_PASSWORD=postgres
+     container_name: postgres
+     volumes:
+       - dbdata:/var/lib/postgresql/data/
    webapp:
      volumes:
        - ".:/app"
+     container_name: 'api'
      restart: always
      build:
        context: .
      ports:
          - "8000:8000"
      command: ["python3", "manage.py", "runserver", "0.0.0.0:8000"]
+     depends_on:
+       - postgres
    celeryworker:
      restart: always
      build:
@@ -26,3 +39,6 @@ services:
        - ".:/app"
      depends_on:
        - redis
+
+volumes:
+  dbdata:
