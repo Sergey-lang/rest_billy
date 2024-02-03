@@ -1,7 +1,11 @@
 from pathlib import Path
 from datetime import timedelta
-import os
 from celery.schedules import crontab
+from dotenv import load_dotenv
+import os
+
+# Load environment variables from .env file
+load_dotenv()
 
 # Build paths inside the project like this: BASE_DIR / 'subdir'.
 BASE_DIR = Path(__file__).resolve().parent.parent
@@ -10,14 +14,12 @@ BASE_DIR = Path(__file__).resolve().parent.parent
 # See https://docs.djangoproject.com/en/4.2/howto/deployment/checklist/
 
 # SECURITY WARNING: keep the secret key used in production secret!
-SECRET_KEY = 'django-insecure-h0yu%x8btn3zzf7yix25_624no*ma*ju4rex8e3tua54dvl67n'
-# SECRET_KEY = os.environ.get('DJANGO_SECRET_KEY', 'django-insecure-h0yu%x8btn3zzf7yix25_624no*ma*ju4rex8e3tua54dvl67n')
+SECRET_KEY = os.environ.get('DJANGO_SECRET_KEY', 'django-insecure-h0yu%x8btn3zzf7yix25_624no*ma*ju4rex8e3tua54dvl67n')
 
 # SECURITY WARNING: don't run with debug turned on in production!
-DEBUG = True
-# DEBUG = bool(os.environ.get('DJANGO_DEBUG', True))
+DEBUG = bool(os.environ.get('DJANGO_DEBUG', True))
 
-ALLOWED_HOSTS = ['*']
+ALLOWED_HOSTS = os.environ.get("DJANGO_ALLOWED_HOSTS", "").split()
 
 # Application definition
 
@@ -72,21 +74,14 @@ WSGI_APPLICATION = 'customBilly.wsgi.application'
 # Database
 # https://docs.djangoproject.com/en/4.2/ref/settings/#databases
 
-# DATABASES = {
-#     'default': {
-#         'ENGINE': 'django.db.backends.sqlite3',
-#         'NAME': BASE_DIR / 'db.sqlite3',
-#     }
-# }
-
 DATABASES = {
     'default': {
-        'ENGINE': 'django.db.backends.postgresql',
-        'NAME': 'postgres',
-        'USER': 'postgres',
-        'PASSWORD': 'postgres',
-        'HOST': 'postgres',
-        'PORT': '5432',
+        'ENGINE': os.environ.get("SQL_ENGINE", "django.db.backends.sqlite3"),
+        'NAME': os.environ.get("SQL_NAME", os.path.join(BASE_DIR, "db.sqlite3")),
+        'USER': os.environ.get("SQL_USER", "postgres"),
+        'PASSWORD': os.environ.get("SQL_PASSWORD", "password"),
+        'HOST': os.environ.get("SQL_HOST", "localhost"),
+        'PORT': os.environ.get("SQL_PORT", "5432"),
     }
 }
 
@@ -134,9 +129,8 @@ REST_FRAMEWORK = {
         'rest_framework.throttling.ScopedRateThrottle',
     ],
     'DEFAULT_THROTTLE_RATES': {
-        'user': '10000/day',  # Лимит для UserRateThrottle
-        'anon': '1000/day',  # Лимит для AnonRateThrottle
-        # 'low_request': '1/minute',
+        'user': '10000/day',
+        'anon': '1000/day',
     },
     'DEFAULT_RENDERER_CLASSES': [
         'rest_framework.renderers.JSONRenderer',
