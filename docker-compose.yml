@@ -7,10 +7,6 @@ services:
      image: postgres:16.1
      restart: always
      container_name: postgres
-     environment:
-       - POSTGRES_NAME=postgres
-       - POSTGRES_USER=postgres
-       - POSTGRES_PASSWORD=postgres
      env_file:
        - ./.env
      volumes:
