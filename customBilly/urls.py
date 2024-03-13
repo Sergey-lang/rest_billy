@@ -1,6 +1,7 @@
 from django.contrib import admin
 from django.urls import path, include
 from rest_framework import routers
+from django.shortcuts import redirect
 
 from billy.views import *
 from order.views import APIOrderDetail, APIOrders, APIUpdateOrderStatus
@@ -10,6 +11,7 @@ from transaction.views import APITransaction
 router = routers.DefaultRouter()
 
 urlpatterns = [
+    path('', lambda request: redirect('admin/')),
     path('api/v1/auth/', include('djoser.urls')),
     path('api/v1/auth/', include('djoser.urls.jwt')),
     path('admin/', admin.site.urls),
